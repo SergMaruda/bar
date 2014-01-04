@@ -14,6 +14,9 @@ public:
 
 private:
     Ui::barClass ui;
+private Q_SLOTS:
+  void OnDoubleClick(QModelIndex);
+
 };
 
 #endif // BAR_H
