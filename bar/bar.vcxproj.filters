@@ -66,5 +66,11 @@
     <ClInclude Include="GeneratedFiles\ui_bar.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="bar.rc" />
   </ItemGroup>
 </Project>
