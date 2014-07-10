@@ -33,6 +33,9 @@
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
+    <Filter Include="Source Files\Models">
+      <UniqueIdentifier>{413ee4e1-b88a-4129-bd2d-631bfa050630}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -49,6 +52,9 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\qrc_bar.cpp">
       <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Models\GoodsStoreModel.cpp">
+      <Filter>Source Files\Models</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -68,6 +74,9 @@
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Models\GoodsStoreModel.h">
+      <Filter>Source Files\Models</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

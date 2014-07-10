@@ -8,6 +8,7 @@
 class QSqlTableModel;
 class QSqlDatabase;
 class QSqlQueryModel;
+class QGoodsStoreModels;
 
 class bar : public QMainWindow
 {
@@ -19,17 +20,20 @@ public:
 
 private:
     Ui::barClass ui;
-    QSqlTableModel* model_goods;
+    QGoodsStoreModels* model_goods;
     QSqlTableModel* model_transactions_view;
     QSqlTableModel* model_transactions;
     QSqlQueryModel* model_order_price;
     QSqlQueryModel* model_purchase_price;
     QSqlQueryModel* model_cash;
+    QSqlTableModel* model_users;
     QSqlDatabase m_db;
+    void _ReloadModel(QSqlTableModel*);
 private Q_SLOTS:
   void OnDoubleClick(QModelIndex);
   void OnOnConfirmSelling();
   void OnOnConfirmPurchase();
+  void OnOnChangeCash();
   void UpdateChange();
   void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
   void NoGoodToolTip();

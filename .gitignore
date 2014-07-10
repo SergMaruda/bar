@@ -17,3 +17,13 @@
 /bar/*.vspscc
 
 /bar/*.suo
+/bar/Win32/Release/*.dll
+/bar/Release/*.tlog
+
+/bar/Release/*.obj
+
+/bar/Win32/Release/*.exe
+
+/bar/Release
+
+/bar/Win32/Release

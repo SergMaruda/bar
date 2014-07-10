@@ -1,0 +1,9 @@
+.tables
+
+.mode csv
+.separator ;
+
+.import GoodsObolon.csv GOODS
+select * from GOODS;
+delete from Transactions
+where Transactions.GOOD_ID = 9999;

@@ -94,6 +94,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Models\GoodsStoreModel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="bar.h">
@@ -122,6 +123,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_bar.h" />
+    <ClInclude Include="Models\GoodsStoreModel.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
