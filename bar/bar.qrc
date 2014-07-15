@@ -1,4 +1,5 @@
 <RCC>
-    <qresource prefix="bar">
-    </qresource>
+  <qresource prefix="bar">
+    <file>Resources/1283428005-7788.jpg</file>
+  </qresource>
 </RCC>

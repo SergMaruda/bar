@@ -56,6 +56,18 @@
     <ClCompile Include="Models\GoodsStoreModel.cpp">
       <Filter>Source Files\Models</Filter>
     </ClCompile>
+    <ClCompile Include="Models\TransactionsViewModel.cpp">
+      <Filter>Source Files\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Models\GoodsCheckModel.cpp">
+      <Filter>Source Files\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_GoodsCheckModel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_GoodsCheckModel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="bar.h">
@@ -67,6 +79,9 @@
     <CustomBuild Include="bar.qrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="Models\GoodsCheckModel.h">
+      <Filter>Source Files\Models</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_bar.h">
@@ -77,6 +92,12 @@
     </ClInclude>
     <ClInclude Include="Models\GoodsStoreModel.h">
       <Filter>Source Files\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Models\TransactionsViewModel.h">
+      <Filter>Source Files\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="TransactionStatus.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

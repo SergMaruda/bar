@@ -27,11 +27,15 @@ private:
     QSqlQueryModel* model_purchase_price;
     QSqlQueryModel* model_cash;
     QSqlTableModel* model_users;
+    QSqlTableModel* goods_check_view;
     QSqlDatabase m_db;
     void _ReloadModel(QSqlTableModel*);
+    double _getNewestPurchasePrice(int id);
+    QString _GetUserPassword(int id);
 private Q_SLOTS:
+
   void OnDoubleClick(QModelIndex);
-  void OnOnConfirmSelling();
+  void OnOnConfirmSale();
   void OnOnConfirmPurchase();
   void OnOnChangeCash();
   void UpdateChange();
@@ -40,6 +44,10 @@ private Q_SLOTS:
   void _UpdatePurchasePrice();
   void _UpdateCash();
   void _UpdateOrderPrice();
+  QListWidgetItem* _findGoodItem(int good_id);
+  void _SyncGoodsIcons();
+  void _UpdateTakeOffMode();
+  void _PerformGoodsCheck();
 };
 
 #endif // BAR_H
