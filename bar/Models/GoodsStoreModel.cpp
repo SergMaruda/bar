@@ -38,3 +38,13 @@ double QGoodsStoreModels::GoodPrice( int good_id ) const
   double price = sql_qur.record().value(0).toDouble();
   return price;
   }
+
+//--------------------------------------------------------------------------------------------------------------
+QString QGoodsStoreModels::GoodName( int good_id ) const
+  {
+  QString query_str = QString("SELECT [Наименование] FROM GOODS_STORE WHERE ID = %1").arg(good_id);
+  QSqlQuery sql_qur(database());
+  bool qres = sql_qur.exec(query_str);
+  sql_qur.next();
+  return sql_qur.record().value(0).toString();
+  }

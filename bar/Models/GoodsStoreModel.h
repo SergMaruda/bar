@@ -9,4 +9,5 @@ class QGoodsStoreModels: public QSqlTableModel
 
     int GoodNumber(int good_id) const;
     double GoodPrice(int good_id) const;
+    QString GoodName(int good_id) const;
   };
