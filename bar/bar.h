@@ -28,19 +28,21 @@ private:
     QSqlQueryModel* model_cash;
     QSqlTableModel* model_users;
     QSqlTableModel* goods_check_view;
-    QSqlDatabase m_db;
+    QSqlQueryModel* depts_model;
+
     void _ReloadModel(QSqlTableModel*);
     double _getNewestPurchasePrice(int id);
-    QString _GetUserPassword(int id);
 private Q_SLOTS:
 
   void OnDoubleClick(QModelIndex);
+  void MainTabWidgetChanged(int);
   void OnOnConfirmSale();
   void OnOnConfirmPurchase();
   void OnOnChangeCash();
   void UpdateChange();
-  void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
-  void NoGoodToolTip();
+  void TransactionsDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+  void GoodsCheckDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+  void GoodsStoreDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
   void _UpdatePurchasePrice();
   void _UpdateCash();
   void _UpdateOrderPrice();
@@ -48,6 +50,17 @@ private Q_SLOTS:
   void _SyncGoodsIcons();
   void _UpdateTakeOffMode();
   void _PerformGoodsCheck();
-};
+  void _UpdateGoodsCheckMode();
+  void _ResetGoodsCheck();
+  void _NotifyNoGood();
+  void _OnRightClickGoodsView(QPoint pos);
+  void _OnAddGood();
+  void _OnRemoveGood();
+  void _OnEditGood();
+  void _OnDebtsByPersons();
+  void _OnDebtsByGood();
+  void _OnRemoveDebt();
+  void _OnUpdateTotal();
+  };
 
 #endif // BAR_H

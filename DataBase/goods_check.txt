@@ -1,0 +1,9 @@
+.tables
+
+.mode csv
+.separator ;
+
+
+
+.import GoodsCheck.csv GOODS_CHECK
+select * from GOODS_CHECK;

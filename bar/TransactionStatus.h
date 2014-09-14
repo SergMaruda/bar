@@ -9,9 +9,11 @@ namespace TransactionStatus
     WaitingForPurchasePayment = 2,
     PurchasePayed = 3,
     Canceled = 4,
-    Goodwithdrawal = 5,
-    GoodPayedCostPrice = 6,
+    PrepareGoodwithdrawal = 5,
+    Goodwithdrawal = 6,
     WrittenOff = 7,
-    NotUsed = 8
+    SaleCanceled = 8,
+    PaydedWithDiscount = 9,
+    Unknown = 999,
     };
   };

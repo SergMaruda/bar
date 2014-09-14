@@ -33,12 +33,34 @@ Qt::ItemFlags GoodsCheckModel::flags(const QModelIndex &index) const
 //---------------------------------------------------------------------------------------------------------------------------------------
 QVariant GoodsCheckModel::data(const QModelIndex &idx, int role /*=Qt::DisplayRole*/) const
   {
+  if (role == Qt::CheckStateRole)
+    return QVariant();
+
+  if (role == Qt::BackgroundRole) 
+    {
+    int row = idx.row();
+
+    QSqlRecord rec = record(row);
+    int number = rec.value(3).toInt();
+    if(number < 0)
+      {
+      QColor color(255,0,0, 64);           
+      return QBrush(color);
+      }
+
+    if(number > 0)
+      {
+      QColor color(0,255,0, 64);           
+      return QBrush(color);
+      }
+    }
+
   return QSqlTableModel::data(idx, role);
   }
 
 void GoodsCheckModel::_dataChanged( const QModelIndex &topLeft, const QModelIndex &bottomRight)
   {
-  if(topLeft == bottomRight)
+  if(topLeft.isValid() && topLeft == bottomRight)
     {
     int row = topLeft.row();
     int number = topLeft.data().toInt();

@@ -1,5 +1,7 @@
 <RCC>
-  <qresource prefix="bar">
-    <file>Resources/1283428005-7788.jpg</file>
-  </qresource>
+    <qresource prefix="/bar">
+        <file>Resources/fonstola.ru-51058.jpg</file>
+        <file>Resources/1283428005-7788.jpg</file>
+        <file>Resources/edit_icon.png</file>
+    </qresource>
 </RCC>

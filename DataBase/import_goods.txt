@@ -3,7 +3,8 @@
 .mode csv
 .separator ;
 
+delete from GOODS
+where GOOD_ID <> 9999;
+
 .import GoodsObolon.csv GOODS
 select * from GOODS;
-delete from Transactions
-where Transactions.GOOD_ID = 9999;
