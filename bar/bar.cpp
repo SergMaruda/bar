@@ -717,7 +717,7 @@ void bar::GoodsStoreDataChanged( const QModelIndex &topLeft, const QModelIndex &
 
     if(col == 2)
       {
-      int good_id =   model_goods->record(row).value("ID").toInt();
+      int good_id = model_goods->record(row).value("ID").toInt();
 
       float new_price = topLeft.data().toFloat();
       QString quary_str(QString("UPDATE GOODS SET Price=\"%1\" WHERE GOOD_ID=%2").arg(new_price).arg(good_id));
@@ -779,5 +779,5 @@ void bar::_OnUpdateTotal()
   if(query.next())
     value = query.value(0).toFloat();
 
-  ui.lineEditTotal->setText(QString::number(value, 'f', 2));
+  ui.lineEditTotal->setText(QString::number(value, 'f', 2) + QString::fromUtf16(L" грн."));
   }
