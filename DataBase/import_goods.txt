@@ -3,6 +3,8 @@
 .mode csv
 .separator ;
 
+PRAGMA foreign_keys = ON;
+
 delete from GOODS
 where GOOD_ID <> 9999;
 
