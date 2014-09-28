@@ -43,7 +43,7 @@ void QLoginDialog::accept()
   auto app = QBarApplication::instance();
   QString user_name = ui->lineEditUser->text();
   int user_id = app->userID(user_name);
-
+  QPoint pos = QCursor::pos();
   QString pass = app->userPassword(user_id);
 
   if(ui->lineEditPassword->text() == pass && !pass.isEmpty())
@@ -62,11 +62,33 @@ void QLoginDialog::accept()
 
     app->settings().setValue("login/last_password", pass);
     app->settings().setValue("login/last_user", user_name);
+
+
+    QString new_pwd = ui->lineEditNewPassword->text();
+    QString new_pwd_copy = ui->lineEditNewPasswordCopy->text();
+
+    if(!new_pwd.isEmpty())
+      {
+      if(new_pwd != new_pwd_copy)
+        {
+        std::wstring str = L"Новый пароль не верный";
+        QToolTip::showText(pos, QString::fromUtf16(str.c_str()), 0, QRect(), 500);
+        return;
+        }
+      else
+        {
+        if(false == app->changePassword(pass, new_pwd))
+          {
+          std::wstring str = L"Пароль должен быть длиной от 4-х до 15-ти символов и содержать латинские буквы и цифри";
+          QToolTip::showText(pos, QString::fromUtf16(str.c_str()), 0, QRect(), 500);
+          return;
+          }
+        }
+      }
     QDialog::accept();
     }
   else
     {
-    QPoint pos = QCursor::pos();
     std::wstring str = L"Неправильный логин/пароль";
     QToolTip::showText(pos, QString::fromUtf16(str.c_str()), 0, QRect(), 500);
     }

@@ -20,13 +20,17 @@ public:
     int currentUser();
     int currentUserRole();
     QString currentUserName() const ;
+    QString currentUserPassword() const ;
     void setCurrentUser(int);
+
     QSqlTableModel* model_users();
     QString userPassword(int id) const;
     QString userName(int id) const;
     int userID(QString i_user_name) const;
     QIcon goodIcon(int id) const;
     void removeGoodIcon(int id);
+    bool changePassword(const QString& old_pass, const QString& new_pass);
+
 
     QSettings& settings();
 

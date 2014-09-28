@@ -4,6 +4,8 @@
 #include <QtWidgets\qmessagebox.h>
 #include <QtSql\qsqlquery.h>
 #include <QtGui\qicon.h>
+#include <QtCore\qregularexpression.h>
+#include <QtSql\qsqlerror.h>
 
 static QBarApplication* g_inst = nullptr;
 
@@ -28,6 +30,11 @@ QBarApplication::QBarApplication(int &argc, char **argv)
     m_db.setDatabaseName("bar.db");
     ok = m_db.open();
     }
+
+  if(!ok)
+    QMessageBox::critical(nullptr, "Critial error", "No database file found");
+
+  QSqlQuery query("PRAGMA foreign_keys = ON;");
 
   if(!ok)
     {
@@ -130,6 +137,12 @@ QString QBarApplication::currentUserName() const
   }
 
 //--------------------------------------------------------------------
+QString QBarApplication::currentUserPassword() const
+  {
+  return userPassword(m_current_user_id);
+  }
+
+//--------------------------------------------------------------------
 QSettings& QBarApplication::settings()
   {
   return m_settings;
@@ -156,4 +169,25 @@ int QBarApplication::userID( QString i_user_name ) const
   if(query.next())
     return query.value(0).toInt();
   return -1;
+  }
+
+//--------------------------------------------------------------------
+bool QBarApplication::changePassword(const QString& old_pass, const QString& new_pass )
+  {
+  if(old_pass == currentUserPassword())
+    {
+    QRegularExpression reg("^(?=.*\\d).{4,15}$");
+    QRegularExpressionMatch m = reg.match(new_pass); 
+    if(m.hasMatch())
+      {
+      QString str = QString("UPDATE USERS SET PASSWORD=\"%1\" WHERE USER_ID=%2").arg(new_pass).arg(currentUser());
+      QSqlQuery query(str);
+      auto err = query.lastError();
+
+      return err.isValid() == false;
+      }
+    else
+      return false;
+    }
+  return false;
   }

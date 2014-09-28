@@ -24,6 +24,10 @@
 #include <QtCore\qstandardpaths.h>
 #include "UserRoles.h"
 #include "..\..\Src\qtbase\src\widgets\widgets\qmenu.h"
+#include <QtCore\qprocess.h>
+#include <QtCore\qfileinfo.h>
+#include <QtCore\qregularexpression.h>
+#include <QtCore\qsettings.h>
 
 //----------------------------------------------------
 /*
@@ -47,14 +51,27 @@ namespace TransactionsView
     };
   }
 
+namespace GoodsStoreView
+  {
+  enum
+    {
+    ID = 0
+    };
+  }
+
 
 //------------------------------------------------------------
 bar::bar(QWidget *parent)
     : QMainWindow(parent)
   {
-  model_users = QBarApplication::instance()->model_users();
+  auto bar_app = QBarApplication::instance();
+  model_users = bar_app->model_users();
 
   ui.setupUi(this);
+
+  int font = bar_app->settings().value("UI/font", 8).toInt();
+  _setFont(font);
+
   ui.tableViewGood->hideColumn(1);
 
   model_order_price = new QSqlQueryModel(this);
@@ -135,8 +152,6 @@ bar::bar(QWidget *parent)
 
   ui.tableViewTransactions->scrollToBottom();
   ui.tableViewTransactions->resizeColumnsToContents();
-  verticalHeader = ui.tableViewTransactions->verticalHeader();
-  verticalHeader->setSectionResizeMode(QHeaderView::ResizeToContents); 
   
   _SyncGoodsIcons();
   ui.tableViewGoodsCheck->setSortingEnabled(true);
@@ -233,17 +248,8 @@ void bar::OnDoubleClick(QModelIndex idx)
         return;
       }
 
-    _SyncGoodsIcons();
-    _ReloadModel(model_transactions);
-    _ReloadModel(model_transactions_view);
-    _ReloadModel(model_goods);
-
-    _UpdateOrderPrice();
-    _UpdatePurchasePrice();
-
+    _UpdateWhenTransactionsChanged();
     ui.tableViewTransactions->scrollToBottom();
-
-
     }
   }
 
@@ -429,7 +435,7 @@ void bar::OnOnChangeCash()
       rec_tr.setValue(2, 3);          //STATUS
       rec_tr.setValue(3, 1);            //Number
       rec_tr.setValue(4, price);       //Price
-      rec_tr.setValue(5, ui.comboBoxResponsible->currentText()); //Comment
+      rec_tr.setValue(5, ui.comboBoxResponsible->currentText()+": "+ui.lineEditReason->text()); //Comment
       rec_tr.setValue(6, curr);        //DATE
 
       int rc = model_transactions->rowCount();
@@ -467,6 +473,7 @@ void bar::OnOnChangeCash()
 
     ui.lineEditPassword->clear();
     ui.tableViewTransactions->scrollToBottom();
+    ui.lineEditReason->clear();
     }
   else
     {
@@ -554,14 +561,11 @@ void bar::_SyncGoodsIcons()
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 void bar::_UpdateTakeOffMode()
   {
-  if(ui.radioButtonCash->isChecked())
-    {
-    ui.doubleSpinBoxIncomeOutcome->show();
-    }
-  else
-    {
-    ui.doubleSpinBoxIncomeOutcome->hide();
-    }
+  bool cash_mode = ui.radioButtonCash->isChecked();
+
+  ui.doubleSpinBoxIncomeOutcome->setHidden(!cash_mode);
+  ui.lineEditReason->setHidden(!cash_mode);
+  ui.labelReason->setHidden(!cash_mode);
   }
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -638,16 +642,20 @@ void bar::_ResetGoodsCheck()
     return;
 
   QString query_str("INSERT INTO GOODS_CHECK VALUES");
-  for(int i = 0; i <model_goods->rowCount(); ++i)
-    {
-    auto rec = model_goods->record(i);
-    query_str += QString("(%1, %2),").arg(rec.value(0).toInt()).arg(rec.value(3).toInt());
-    }
 
-  query_str.resize(query_str.size() - 1);
+  if(model_goods->rowCount() > 0)
+    {
+    for(int i = 0; i <model_goods->rowCount(); ++i)
+      {
+      auto rec = model_goods->record(i);
+      query_str += QString("(%1, %2),").arg(rec.value(0).toInt()).arg(rec.value(3).toInt());
+      }
+
+    query_str.resize(query_str.size() - 1);
     
-  if(false == _UpdateQuery(query_str))
-    return;
+    if(false == _UpdateQuery(query_str))
+      return;
+    }
 
   _ReloadModel(goods_check_view);
   _UpdateGoodsCheckMode();
@@ -663,12 +671,18 @@ void bar::_NotifyNoGood()
 //-----------------------------------------------------------------------------------------------------------------------------
 void bar::_OnRightClickGoodsView(QPoint pos)
   {
-  auto table = ui.tableViewGood;
-  QModelIndex index=table->indexAt(pos);
-  QMenu *menu=new QMenu(this);
-  menu->addAction(ui.actionAddGood);
-  menu->addAction(ui.actionRemoveGood);
-  menu->popup(table->viewport()->mapToGlobal(pos));
+  auto app = QBarApplication::instance();
+
+  if(app->currentUserRole() > UR_BARTENDER)
+    {
+    auto table = ui.tableViewGood;
+    QModelIndex index=table->indexAt(pos);
+    QMenu *menu=new QMenu(this);
+    menu->addAction(ui.actionAddGood);
+    menu->addAction(ui.actionRemoveGood);
+    menu->addAction(ui.actionRemoveGoodCompletly);
+    menu->popup(table->viewport()->mapToGlobal(pos));
+    }
   }
 
 //-----------------------------------------------------------------------------------------------------------------------------
@@ -695,8 +709,45 @@ void bar::_OnRemoveGood()
     {
     int good_id = model_goods->record(idx.row()).value("ID").toInt();
     QString query_str = QString("INSERT INTO REMOVED_GOODS VALUES(%1)").arg(good_id);
-    QSqlQuery sql_qur(query_str);
-    _ReloadModel(model_goods);
+    if(_UpdateQuery(query_str))
+      _ReloadModel(model_goods);
+    }
+  }
+
+//----------------------------------------------------------------------------------------------------------
+void bar::_OnRemoveGoodCompletely()
+  {
+  QMessageBox box(QMessageBox::Question, QString::fromUtf16(L"Полное удаление товара"), 
+    QString::fromUtf16(L"Все зависимые транзакции также удлятся. Продолжить?"), QMessageBox::Yes | QMessageBox::No);
+
+  if(box.exec() == QMessageBox::Yes)
+    {
+    QString delete_transactions = "DELETE FROM GOODS WHERE ";
+    const QString or(" OR "); 
+
+    auto table = ui.tableViewGood;
+    auto indices = table->selectionModel()->selectedIndexes();
+
+    QSet<int> rows;
+    for(auto i = indices.begin(); i != indices.end(); ++i)
+      rows.insert(i->row());
+
+    for(auto i = rows.begin(); i != rows.end(); ++i)
+      {
+      auto data = table->model()->index(*i, GoodsStoreView::ID).data();
+
+      delete_transactions += "GOOD_ID = " + data.toString() + " OR ";
+      }
+
+    delete_transactions.resize(delete_transactions.size() - or.size());
+
+    if(!indices.empty())
+      {
+      if(_UpdateQuery(delete_transactions))
+        {
+        _UpdateWhenTransactionsChanged();
+        }
+      }
     }
   }
 
@@ -781,6 +832,8 @@ void bar::_InitTransactionView( QTableView* ip_tblv)
   ip_tblv->hideColumn(7);
   ip_tblv->hideColumn(8);
   ip_tblv->resizeColumnsToContents();
+  auto verticalHeader = ip_tblv->verticalHeader();
+  verticalHeader->setSectionResizeMode(QHeaderView::ResizeToContents); 
   }
 
 //----------------------------------------------------------------------------------------------------------
@@ -861,3 +914,118 @@ bool bar::_UpdateQuery(const QString& i_query_str)
 
   return true;
   }
+
+//----------------------------------------------------------------------------------------------------------
+void bar::_TransactionsViewRightClick(QPoint pos)
+  {
+  auto table = ui.tableViewTransactions;
+  QModelIndex index=table->indexAt(pos);
+  QMenu *menu=new QMenu(this);
+  menu->addAction(ui.actionRemoveTransaction);
+  menu->popup(table->viewport()->mapToGlobal(pos));
+  }
+
+//----------------------------------------------------------------------------------------------------------
+void bar::_OnRemoveTransaction()
+  {
+  QString delete_transactions = "DELETE FROM TRANSACTIONS WHERE ";
+  const QString or(" OR "); 
+
+  auto table = ui.tableViewTransactions;
+  auto indices = table->selectionModel()->selectedIndexes();
+
+  QSet<int> rows;
+  for(auto i = indices.begin(); i != indices.end(); ++i)
+    rows.insert(i->row());
+
+  for(auto i = rows.begin(); i != rows.end(); ++i)
+    {
+    auto data = table->model()->index(*i,TransactionsView::TransactionID).data();
+
+    delete_transactions += "TR_ID = " + data.toString() + " OR ";
+    }
+
+  delete_transactions.resize(delete_transactions.size() - or.size());
+
+  if(!indices.empty())
+    {
+    if(_UpdateQuery(delete_transactions))
+      {
+      _UpdateWhenTransactionsChanged();
+      }
+    }
+  }
+
+//----------------------------------------------------------------------------------------------------------
+void bar::_UpdateWhenTransactionsChanged()
+  {
+  _SyncGoodsIcons();
+  _ReloadModel(model_transactions);
+  _ReloadModel(model_transactions_view);
+  _ReloadModel(model_goods);
+
+  _UpdateOrderPrice();
+  _UpdatePurchasePrice();
+  _UpdateCash();
+  }
+
+//------------------------------------------------------------
+void bar::_IncFont()
+  {
+  int cFont = _fontSize();
+
+  if(cFont != -1)
+    {
+    ++cFont;
+    _setFont(cFont);
+    }
+  }
+
+//------------------------------------------------------------
+void bar::_DecFont()
+  {
+  int cFont = _fontSize();
+
+  if(cFont != -1)
+    {
+    --cFont;
+    _setFont(cFont);
+    }
+  }
+
+//------------------------------------------------------------
+int bar::_fontSize()
+  {
+  QString style = styleSheet();
+  int idx = style.indexOf(QRegularExpression("font: .*pt"));
+
+  if(idx != -1)
+    {
+    int number_end = style.indexOf("pt",idx);
+    QString number = style.mid(idx+6, number_end - idx-6);
+    return number.toInt();
+    }
+
+  return 8;
+  }
+
+//------------------------------------------------------------
+void bar::_setFont(int new_font)
+  {
+  auto core_app = QBarApplication::instance();
+
+  QString stl = styleSheet();
+  stl.replace(QRegularExpression("font: .*pt"), QString("font: ") + QString::number(new_font) + "pt");
+  setStyleSheet(stl);
+
+  int font = core_app->settings().value("UI/font", 8).toInt();
+  if(font != new_font)
+     core_app->settings().setValue("UI/font", new_font);
+  }
+
+//------------------------------------------------------------
+void bar::_OnExit()
+  {
+  QBarApplication::instance()->exit(10);
+  }
+

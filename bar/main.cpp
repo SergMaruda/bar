@@ -3,9 +3,13 @@
 #include "QLoginDialog.h"
 
 int main(int argc, char *argv[])
-{
+  {
+  QBarApplication* p_app(nullptr);
+  int res = 0;
+  do 
+    {
     QBarApplication a(argc, argv);
-
+    p_app= &a;
     QLoginDialog diag;
     if(diag.exec() == QLoginDialog::Rejected)
       {
@@ -14,5 +18,7 @@ int main(int argc, char *argv[])
 
     bar w;
     w.show();
-    return a.exec();
-}
+    int res = p_app->exec();
+    }
+  while(res != 10);
+  }
