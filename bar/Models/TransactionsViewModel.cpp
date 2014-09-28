@@ -8,16 +8,30 @@
 #include <QtGui\qicon.h>
 #include "QBarApplication.h"
 
+
+TransactionsViewModel::TransactionsViewModel(QObject* parent /*= 0*/, QSqlDatabase db /*= QSqlDatabase()*/):
+  QSqlTableModel(parent, db)
+  {
+  m_trans_colors[TransactionStatus::WaitingForPayment] =         QBrush(QColor(255,0,0, 128));
+  m_trans_colors[TransactionStatus::Sold] =                      QBrush(QColor(0,255,0, 128));
+  m_trans_colors[TransactionStatus::WaitingForPurchasePayment] = QBrush(QColor(255,0,0, 64));
+  m_trans_colors[TransactionStatus::Bought] =                    QBrush(QColor(0,255,0, 64));
+  m_trans_colors[TransactionStatus::PrepareGoodwithdrawal] =     QBrush(QColor(255,255,0, 128));
+  m_trans_colors[TransactionStatus::Goodwithdrawal] =            QBrush(QColor(255,255,0, 64));
+  m_trans_colors[TransactionStatus::SaleCanceled] =              QBrush(QColor(0,0,255, 64));
+    }
+
 //---------------------------------------------------------------------------------------------------------------------------------------
 Qt::ItemFlags TransactionsViewModel::flags(const QModelIndex &index) const
   {
   Qt::ItemFlags f = QSqlTableModel::flags(index);
   int row = index.row();
+  int col = index.column();
 
-  if(record(row).value(0).toInt() == TransactionStatus::WaitingForPurchasePayment && (index.column() == TransactionsViewColumn::Number || index.column() == TransactionsViewColumn::Price || index.column() == TransactionsViewColumn::Sum))
+  if(record(row).value(0).toInt() == TransactionStatus::WaitingForPurchasePayment && (col == TransactionsViewColumn::Number || col == TransactionsViewColumn::Price || col == TransactionsViewColumn::Sum))
     return Qt::ItemFlags (Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
 
-  if(record(row).value(0).toInt() == TransactionStatus::WaitingForPayment && (index.column() == TransactionsViewColumn::Number))
+  if(record(row).value(0).toInt() == TransactionStatus::WaitingForPayment && (col== TransactionsViewColumn::Number))
     return Qt::ItemFlags (Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
 
   return  Qt::ItemIsSelectable | Qt::ItemIsEnabled;
@@ -41,41 +55,9 @@ QVariant TransactionsViewModel::data(const QModelIndex &idx, int role /*=Qt::Dis
 
   if (role == Qt::BackgroundRole) 
     {
-    if(tr_status == TransactionStatus::WaitingForPayment)
-      {
-      QColor color(255,0,0, 128);           
-      return QBrush(color);
-      } 
-    else if(tr_status == TransactionStatus::Payed)
-      {
-      QColor color(0,255,0, 128);           
-      return QBrush(color);
-      }
-    else if(tr_status == TransactionStatus::WaitingForPurchasePayment)
-      {
-      QColor color(255,0,0, 64);           
-      return QBrush(color);
-      }
-    else if(tr_status == TransactionStatus::PurchasePayed)
-      {
-      QColor color(0,255,0, 64);            
-      return QBrush(color);
-      }
-    else if(tr_status == TransactionStatus::PrepareGoodwithdrawal)
-      {
-      QColor color(255,255,0, 128);            
-      return QBrush(color);
-      }
-    else if(tr_status == TransactionStatus::Goodwithdrawal)
-      {
-      QColor color(255,255,0, 64);            
-      return QBrush(color);
-      }
-    else if(tr_status == TransactionStatus::SaleCanceled)
-      {
-      QColor color(0,0,255, 64);            
-      return QBrush(color);
-      }
+    auto i = m_trans_colors.find(tr_status);
+    if(i!=m_trans_colors.end())
+      return m_trans_colors.find(tr_status)->second;
     }
 
   if(idx.isValid() && role ==  Qt::DecorationRole)

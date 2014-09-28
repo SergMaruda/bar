@@ -6,5 +6,15 @@
         <file>Resources/1410749656_Plus__Orange.png</file>
         <file>Resources/1410749675_Close_Box_Red.png</file>
         <file>Resources/user.png</file>
+        <file>Resources/branch-closed.png</file>
+        <file>Resources/branch-end.png</file>
+        <file>Resources/branch-more.png</file>
+        <file>Resources/branch-open.png</file>
+        <file>Resources/down-arrow.png</file>
+        <file>Resources/gamelist-bg.png</file>
+        <file>Resources/main-bg.png</file>
+        <file>Resources/ok.png</file>
+        <file>Resources/up-arrow.png</file>
+        <file>Resources/vline.png</file>
     </qresource>
 </RCC>

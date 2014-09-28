@@ -24,11 +24,15 @@ public:
     QSqlTableModel* model_users();
     QString userPassword(int id) const;
     QString userName(int id) const;
-    int userRole(int id) const;
+    int userID(QString i_user_name) const;
     QIcon goodIcon(int id) const;
+    void removeGoodIcon(int id);
+
     QSettings& settings();
 
 private:
+    int _userRole(int id) const;
+
     int m_current_user_id;
     QDateTime m_login_date;
     QSqlTableModel* mp_model_users;

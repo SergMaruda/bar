@@ -22,6 +22,8 @@
 #include "QBarApplication.h"
 #include <QtWidgets\qheaderview.h>
 #include <QtCore\qstandardpaths.h>
+#include "UserRoles.h"
+#include "..\..\Src\qtbase\src\widgets\widgets\qmenu.h"
 
 //----------------------------------------------------
 /*
@@ -73,8 +75,7 @@ bar::bar(QWidget *parent)
   ui.tableViewGood->resizeColumnsToContents();
   ui.tableViewGood->setSortingEnabled(true);
   ui.tableViewGood->scrollToBottom();
-  ui.tableViewGood->setIconSize(QSize(50,50));
-
+ 
   QHeaderView *verticalHeader = ui.tableViewGood->verticalHeader();
   verticalHeader->setSectionResizeMode(QHeaderView::ResizeToContents);
 
@@ -98,13 +99,8 @@ bar::bar(QWidget *parent)
 
   QObject::connect(model_transactions_view, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(TransactionsDataChanged(const QModelIndex&, const QModelIndex&)));
 
-  ui.tableViewTransactions->setModel(model_transactions_view);
-  
-  ui.tableViewTransactions->hideColumn(0);
-  ui.tableViewTransactions->hideColumn(7);
-  ui.tableViewTransactions->hideColumn(8);
-  _ReloadModel(model_transactions_view);
-  ui.tableViewTransactions->resizeColumnsToContents();
+  _InitTransactionView(ui.tableViewTransactions);  
+  _InitTransactionView(ui.tableViewStatistic);  
 
   model_transactions = new QSqlTableModel(this);;
   model_transactions->setTable("Transactions");
@@ -129,7 +125,8 @@ bar::bar(QWidget *parent)
   for(int i = 0; i < num_users; ++i)
     {
     QSqlRecord rec = model_users->record(i);
-    if(rec.value("ROLE_ID").toInt()  == 0 || rec.value("ROLE_ID").toInt() == 20)
+    int role = rec.value("ROLE_ID").toInt();
+    if(role == UR_FAKE  || role > UR_BARTENDER)
       {
       int user_id = rec.value("USER_ID").toInt();
       ui.comboBoxResponsible->addItem(rec.value("LOGIN").toString(), user_id);
@@ -138,6 +135,9 @@ bar::bar(QWidget *parent)
 
   ui.tableViewTransactions->scrollToBottom();
   ui.tableViewTransactions->resizeColumnsToContents();
+  verticalHeader = ui.tableViewTransactions->verticalHeader();
+  verticalHeader->setSectionResizeMode(QHeaderView::ResizeToContents); 
+  
   _SyncGoodsIcons();
   ui.tableViewGoodsCheck->setSortingEnabled(true);
   _UpdateGoodsCheckMode();
@@ -147,16 +147,17 @@ bar::bar(QWidget *parent)
   QString user_str = QString::fromUtf16(str.c_str());
   ui.statusBar->showMessage(user_str + app->userName(app->currentUser()));
 
-  if(app->currentUserRole() == 10)
-    {
-    ui.tabWidgetMain->removeTab(1);
-    ui.tabWidgetMain->removeTab(1);
-    }
   depts_model = new QSqlQueryModel(this);
   _OnDebtsByPersons();
 
-  ui.dateTimeEditBegin->setDateTime(QDateTime::currentDateTime().addDays(-7));
-  ui.dateTimeEditEnd->setDateTime(QDateTime::currentDateTime());
+  if(app->currentUserRole() <= UR_BARTENDER)
+    {
+    ui.tabWidgetMain->removeTab(1);
+    ui.tabWidgetMain->removeTab(1);
+    ui.tabWidgetMain->removeTab(1);
+    }
+
+  ui.dateTimeEditStatTo->setDateTime(QDateTime::currentDateTime());
   }
 
 //------------------------------------------------------------
@@ -207,7 +208,6 @@ void bar::OnDoubleClick(QModelIndex idx)
     QSqlQuery sql_qur;
     bool qres = sql_qur.exec(query_str);
 
-    int count = sql_qur.record().count();
     int tr_id(-1);
 
     if(sql_qur.next())
@@ -227,8 +227,10 @@ void bar::OnDoubleClick(QModelIndex idx)
       }
     else
       {
-      QString query_str = QString("UPDATE Transactions SET Number=Number+1, DATE=datetime('now', 'localtime')  WHERE TR_ID = %1").arg(tr_id);
-      QSqlQuery sql_qur(query_str);
+
+      QString query_str = QString("UPDATE Transactions SET Number=Number+1, DATE=\"%2\"  WHERE TR_ID = %1").arg(tr_id).arg(QDateTime::currentDateTime().toString(Qt::ISODate));
+      if(false == _UpdateQuery(query_str))
+        return;
       }
 
     _SyncGoodsIcons();
@@ -251,7 +253,7 @@ void bar::OnOnConfirmSale()
   auto change = ui.lineEditChange->text().toDouble();
   if(change < 0)
     {
-    QMessageBox::warning(this, "Невозможно продать товар", "Недостаточно денег внесено");
+    QMessageBox::warning(this, QString::fromUtf16(L"Невозможно продать товар"), QString::fromUtf16(L"Недостаточно денег внесено"));
     return;
     }
 
@@ -259,8 +261,9 @@ void bar::OnOnConfirmSale()
                       "SET STATUS=1\n"
                       "WHERE STATUS=0;";
 
-  QSqlQuery sql_qur;
-  bool res = sql_qur.exec(query_str);
+  if(false == _UpdateQuery(query_str))
+    return;
+
   _ReloadModel(model_transactions);
   _ReloadModel(model_transactions_view);
   _ReloadModel(model_goods);
@@ -302,9 +305,8 @@ void bar::TransactionsDataChanged( const QModelIndex &topLeft, const QModelIndex
     int status_id = status_id_idx.data().toInt();
     QString query_str;
 
-
     auto update_number = [&](int n)
-    {
+      {
       query_str = QString("UPDATE Transactions SET Number=%1 WHERE TR_ID=%2").arg(n).arg(tr_id);
       };
 
@@ -336,9 +338,8 @@ void bar::TransactionsDataChanged( const QModelIndex &topLeft, const QModelIndex
         update_number(number);
       }
 
-    QSqlQuery sql_qur;
-    sql_qur.exec(query_str);
-
+    if(false == _UpdateQuery(query_str))
+      return;
 
     _ReloadModel(model_transactions_view);
     _ReloadModel(model_transactions);
@@ -357,25 +358,22 @@ void bar::OnOnConfirmPurchase()
   double cash = ui.lineEditCash->text().toDouble();
   double to_pay = ui.lineEditPurchasePrice->text().toDouble();
 
-
   if(to_pay > cash)
     {
-    QMessageBox::warning(this, "Ошибка выволнения", "Недасточно денег в кассе пароль");
+    QMessageBox::warning(this, QString::fromUtf16(L"Ошибка выволнения"), QString::fromUtf16(L"Недасточно денег в кассе пароль"));
     return;
     }
 
   QString query_str_update_status = QString("UPDATE Transactions SET Price=-Price WHERE STATUS=%1").arg(TransactionStatus::WaitingForPurchasePayment);
-  QString query_str_update_price = QString("UPDATE Transactions SET STATUS=%1 WHERE STATUS=%2").arg(TransactionStatus::PurchasePayed).arg(TransactionStatus::WaitingForPurchasePayment);
+  QString query_str_update_price = QString("UPDATE Transactions SET STATUS=%1 WHERE STATUS=%2").arg(TransactionStatus::Bought).arg(TransactionStatus::WaitingForPurchasePayment);
 
-  QSqlQuery sql_qur;
+  if(false == _UpdateQuery(query_str_update_status))
+    return;
 
-  bool res = sql_qur.exec(query_str_update_status);
-  Q_ASSERT(res);
+  if(false == _UpdateQuery(query_str_update_price))
+    return;
 
-  res = sql_qur.exec(query_str_update_price);
-  Q_ASSERT(res);
-
-    _ReloadModel(model_transactions_view);
+  _ReloadModel(model_transactions_view);
   _ReloadModel(model_transactions);
   _ReloadModel(model_goods);
 
@@ -448,7 +446,8 @@ void bar::OnOnChangeCash()
       query_str = QString("UPDATE Transactions SET STATUS=%1, COMMENT=\"%2\" WHERE STATUS=%3").
         arg(TransactionStatus::Goodwithdrawal).arg(ui.comboBoxResponsible->currentText()).arg(TransactionStatus::PrepareGoodwithdrawal);
 
-      QSqlQuery q(query_str);
+      if(false ==_UpdateQuery(query_str))
+        return;
 
       for(int i = 0; i < ids.size(); ++i)
         {
@@ -489,13 +488,19 @@ void bar::_ReloadModel( QSqlTableModel* ip_model)
 //------------------------------------------------------
 double bar::_getNewestPurchasePrice( int id )
   {
-  QString query_str = QString("SELECT Price, MAX(Date) FROM Transactions WHERE GOOD_ID = %1 and STATUS = %2 AND PRICE <> 0").arg(id).arg(TransactionStatus::PurchasePayed);
+  QString query_str = QString("SELECT Price, MAX(Date) FROM Transactions WHERE GOOD_ID = %1 and STATUS = %2 AND PRICE <> 0").arg(id).arg(TransactionStatus::Bought);
   QSqlQuery sql_qur;
   bool qres = sql_qur.exec(query_str);
   sql_qur.next();
   QSqlRecord rec = sql_qur.record();
   double price = rec.value(0).toDouble();
   Q_ASSERT(price <= 0);
+  
+  if(price == 0)
+    {
+    price = - model_goods->GoodPrice(id) / 2; 
+    }
+
   return -price;
   }
 
@@ -573,7 +578,7 @@ void bar::_PerformGoodsCheck()
     int good_id = model->data(model->index(i, 0)).toInt();
     int diff = model->data(model->index(i, 3)).toInt();
     
-    status = (diff < 0) ? TransactionStatus::Payed : ( (diff > 0) ? TransactionStatus::SaleCanceled : TransactionStatus::Unknown);
+    status = (diff < 0) ? TransactionStatus::Sold : ( (diff > 0) ? TransactionStatus::SaleCanceled : TransactionStatus::Unknown);
 
     if(status != TransactionStatus::Unknown)
       {
@@ -629,7 +634,9 @@ void bar::GoodsCheckDataChanged( const QModelIndex &topLeft, const QModelIndex &
 //-----------------------------------------------------------------------------------------------------------------------------
 void bar::_ResetGoodsCheck()
   {
-  QSqlQuery sql_qur("DELETE FROM GOODS_CHECK");
+  if(false == _UpdateQuery("DELETE FROM GOODS_CHECK"))
+    return;
+
   QString query_str("INSERT INTO GOODS_CHECK VALUES");
   for(int i = 0; i <model_goods->rowCount(); ++i)
     {
@@ -638,9 +645,9 @@ void bar::_ResetGoodsCheck()
     }
 
   query_str.resize(query_str.size() - 1);
-  bool res = QSqlQuery(query_str).result();
-
-  Q_ASSERT(res);
+    
+  if(false == _UpdateQuery(query_str))
+    return;
 
   _ReloadModel(goods_check_view);
   _UpdateGoodsCheckMode();
@@ -668,7 +675,9 @@ void bar::_OnRightClickGoodsView(QPoint pos)
 void bar::_OnAddGood()
   {
   QString query_str = (QString::fromUtf16(L"INSERT INTO GOODS VALUES(NULL, \"Новый товар\", 0)"));
-  QSqlQuery sql_qur(query_str);
+  if(false == _UpdateQuery(query_str))
+    return;
+
   _ReloadModel(model_goods);
   auto table = ui.tableViewGood;
   QModelIndex idx = table->model()->index(0,1);
@@ -692,12 +701,6 @@ void bar::_OnRemoveGood()
   }
 
 //-----------------------------------------------------------------------------------------------------------------------------
-void bar::_OnEditGood()
-  {
-
-  }
-
-//-----------------------------------------------------------------------------------------------------------------------------
 void bar::GoodsStoreDataChanged( const QModelIndex &topLeft, const QModelIndex &bottomRight )
   {
   if(topLeft.isValid() && topLeft == bottomRight)
@@ -705,14 +708,14 @@ void bar::GoodsStoreDataChanged( const QModelIndex &topLeft, const QModelIndex &
     int row = topLeft.row();
     int col = topLeft.column();
 
+    QString quary_str;
+
     if(col == 1)
       {
-      int good_id =   model_goods->record(row).value("ID").toInt();
+      int good_id = model_goods->record(row).value("ID").toInt();
 
       QString new_good_name = topLeft.data().toString();
-      QString quary_str(QString("UPDATE GOODS SET Name=\"%1\" WHERE GOOD_ID=%2").arg(new_good_name).arg(good_id));
-      bool res = QSqlQuery().exec(quary_str);
-      Q_ASSERT(res);
+      quary_str = (QString("UPDATE GOODS SET Name=\"%1\" WHERE GOOD_ID=%2").arg(new_good_name).arg(good_id));
       }
 
     if(col == 2)
@@ -720,10 +723,12 @@ void bar::GoodsStoreDataChanged( const QModelIndex &topLeft, const QModelIndex &
       int good_id = model_goods->record(row).value("ID").toInt();
 
       float new_price = topLeft.data().toFloat();
-      QString quary_str(QString("UPDATE GOODS SET Price=\"%1\" WHERE GOOD_ID=%2").arg(new_price).arg(good_id));
-      bool res = QSqlQuery().exec(quary_str);
-      Q_ASSERT(res);
+      quary_str = (QString("UPDATE GOODS SET Price=\"%1\" WHERE GOOD_ID=%2").arg(new_price).arg(good_id));
       }
+
+
+    if(false == _UpdateQuery(quary_str))
+      return;
     }
   }
 
@@ -756,28 +761,103 @@ void bar::_OnRemoveDebt()
     int user_id = rec.value(0).toInt();
     
     QString query_str = QString("UPDATE Transactions SET STATUS=%1 WHERE TR_ID IN (SELECT TR_ID FROM GoodWithhold WHERE USER_ID = %2)").arg(TransactionStatus::PaydedWithDiscount).arg(user_id);
-    QSqlQuery sql_qur(query_str);
+
+    if(false == _UpdateQuery(query_str))
+      return;
+
     _OnDebtsByPersons();
     _UpdateCash();
+    _ReloadModel(model_transactions_view);
     }
   }
 
-//----------------------------------------------------------------------------------------
-void bar::_OnUpdateTotal()
+//----------------------------------------------------------------------------------------------------------
+void bar::_InitTransactionView( QTableView* ip_tblv)
   {
-  const wchar_t* psz_query = L"SELECT SUM(Transactions.[NUMBER] * Transactions.[PRICE])\n"
-                             L"FROM Transactions\n"
-                             L"WHERE (Transactions.[STATUS] = 1 /*Продано*/\n"
-                             L"OR Transactions.[STATUS] = 8) /*Отмена продажи*/\n"
-                             L"AND Transactions.[DATE] BETWEEN \"%1\" AND \"%2\"";
+  ip_tblv->setModel(model_transactions_view);
+  _ReloadModel(model_transactions_view);
 
-  auto query_str = QString::fromUtf16(psz_query).arg(ui.dateTimeEditBegin->text()).arg(ui.dateTimeEditEnd->text());
+  ip_tblv->hideColumn(0);
+  ip_tblv->hideColumn(7);
+  ip_tblv->hideColumn(8);
+  ip_tblv->resizeColumnsToContents();
+  }
+
+//----------------------------------------------------------------------------------------------------------
+void bar::_UpdateStat()
+  {
+  QString query_str = "SELECT SUM(Transactions.[NUMBER] * Transactions.[PRICE])\n"
+                      "FROM Transactions\n"
+                      " WHERE ";
+
+  std::map<QCheckBox*, TransactionStatus::ETrStatus> line_edit_status;
+
+  line_edit_status[ui.checkBoxSold] = TransactionStatus::Sold;
+  line_edit_status[ui.checkBoxBought] = TransactionStatus::Bought;
+  line_edit_status[ui.checkBoxCancelOrder] = TransactionStatus::SaleCanceled;
+  line_edit_status[ui.checkBoxCost] = TransactionStatus::PaydedWithDiscount;
+  line_edit_status[ui.checkBoxWithDraw] = TransactionStatus::Goodwithdrawal;
+
+  auto end = line_edit_status.end();
+
+  QString condition;
+
+  QString condition_tr = "(";
+  for(auto i  = line_edit_status.begin(); i != end; ++i)
+    {
+    if(i->first->isChecked())
+      {
+      condition_tr += QString("Transactions.[STATUS]=%1 OR ").arg(i->second);
+      }
+    }
+
+  if(condition_tr.length() > 1)
+    {
+    condition_tr.resize(condition_tr.size() - 4);
+    condition_tr+=") AND ";
+    condition += condition_tr;
+    }
+
+  if(ui.checkBoxWrittenOff->isChecked())
+    {
+    query_str += "(Transactions.[TR_ID] IN (SELECT GoodWithhold.[TR_ID] FROM GoodWithhold WHERE USER_ID = 7)) AND ";
+    }
+
+  auto date_to_str = [](QDateTimeEdit* ip_date)
+    {
+    return ip_date->dateTime().toString(Qt::ISODate);
+    };
+
+  auto date_from = date_to_str(ui.dateTimeEditStatFrom);
+  auto date_to = date_to_str(ui.dateTimeEditStatTo);
+  
+  condition += QString("Transactions.[DATE] BETWEEN \"%1\" AND \"%2\" ").arg(date_from).arg(date_to);
+
+  query_str += condition;
 
   QSqlQuery query(query_str);
+  
   float value(0);
 
   if(query.next())
     value = query.value(0).toFloat();
+  ui.lineEditStatSum->setText(QString::number(value, 'f', 2));
+  }
 
-  ui.lineEditTotal->setText(QString::number(value, 'f', 2) + QString::fromUtf16(L" грн."));
+//----------------------------------------------------------------------------------------------------------
+bool bar::_UpdateQuery(const QString& i_query_str)
+  {
+  if(i_query_str.isEmpty())
+    return true;
+
+  QSqlQuery sql_qur(i_query_str);
+
+  auto error = sql_qur.lastError();
+  if(error.isValid())
+    {
+    QMessageBox::warning(this, QString::fromUtf16(L"Ошибка запроса"), error.text());
+    return false;
+    }
+
+  return true;
   }

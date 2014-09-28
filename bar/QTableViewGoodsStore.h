@@ -3,6 +3,9 @@
 
 #include <QTableView >
 
+class QDragEnterEvent;
+class QDropEvent;
+
 class QTableViewGoodsStore : public QTableView 
 {
   Q_OBJECT
@@ -12,7 +15,10 @@ public:
     ~QTableViewGoodsStore();
 
 private:
-    
-};
+  void dragEnterEvent(QDragEnterEvent*);
+  void dropEvent(QDropEvent*);
+  void dragMoveEvent( QDragMoveEvent* );
+
+  };
 
 #endif // QTABLEVIEWGOODSSTORE_H

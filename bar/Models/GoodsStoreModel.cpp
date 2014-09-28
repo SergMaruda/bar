@@ -3,6 +3,7 @@
 #include <QtSql\qsqlrecord.h>
 #include "QBarApplication.h"
 #include <QtGui\qicon.h>
+#include "UserRoles.h"
 
 //--------------------------------------------------------------------------------------------------------------
 QGoodsStoreModels::QGoodsStoreModels( QObject *parent /*= 0*/, QSqlDatabase db /*= QSqlDatabase()*/ ):
@@ -77,9 +78,7 @@ Qt::ItemFlags QGoodsStoreModels::flags(const QModelIndex &index) const
 
     auto app = QBarApplication::instance();
 
-    int user_role = app->currentUserRole();
-
-    if(user_role == 0)
+    if(app->currentUserRole() > UR_BARTENDER)
       {
       if(col == 1 || col == 2)
         return Qt::ItemFlags (Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);

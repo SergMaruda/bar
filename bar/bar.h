@@ -56,11 +56,13 @@ private Q_SLOTS:
   void _OnRightClickGoodsView(QPoint pos);
   void _OnAddGood();
   void _OnRemoveGood();
-  void _OnEditGood();
   void _OnDebtsByPersons();
   void _OnDebtsByGood();
   void _OnRemoveDebt();
-  void _OnUpdateTotal();
+
+  void _InitTransactionView(QTableView*);
+  void _UpdateStat();
+  bool _UpdateQuery(const QString&);
   };
 
 #endif // BAR_H

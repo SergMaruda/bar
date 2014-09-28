@@ -107,6 +107,18 @@
     <ClCompile Include="GeneratedFiles\Release\moc_QTableViewGoodsStore.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="UserRoles.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_filedownloader.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_filedownloader.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="filedownloader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="bar.h">
@@ -136,6 +148,9 @@
     <CustomBuild Include="QTableViewGoodsStore.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="filedownloader.h">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_bar.h">
@@ -156,8 +171,14 @@
     <ClInclude Include="GeneratedFiles\ui_QLoginDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="UserRoles.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="bar.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\favicon.ico" />
   </ItemGroup>
 </Project>

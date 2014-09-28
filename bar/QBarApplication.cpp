@@ -87,6 +87,12 @@ void QBarApplication::setCurrentUser(int id)
   }
 
 //--------------------------------------------------------------------
+void QBarApplication::removeGoodIcon( int id )
+  {
+  m_icons.erase(id);
+  }
+
+//--------------------------------------------------------------------
 QIcon QBarApplication::goodIcon( int id ) const
   {
   auto icn = m_icons.find(id);
@@ -130,7 +136,7 @@ QSettings& QBarApplication::settings()
   }
 
 //--------------------------------------------------------------------
-int QBarApplication::userRole( int id ) const
+int QBarApplication::_userRole( int id ) const
   {
   QSqlQuery query(QString("SELECT ROLE_ID FROM USERS WHERE USER_ID = %1").arg(id));
   query.next();
@@ -140,5 +146,14 @@ int QBarApplication::userRole( int id ) const
 //--------------------------------------------------------------------
 int QBarApplication::currentUserRole()
   {
-  return userRole(m_current_user_id);
+  return _userRole(m_current_user_id);
+  }
+
+//--------------------------------------------------------------------
+int QBarApplication::userID( QString i_user_name ) const
+  {
+  QSqlQuery query(QString("SELECT USER_ID FROM USERS WHERE LOGIN = \"%1\"").arg(i_user_name));
+  if(query.next())
+    return query.value(0).toInt();
+  return -1;
   }
