@@ -655,15 +655,26 @@ void bar::_NotifyNoGood()
 void bar::_OnRightClickGoodsView(QPoint pos)
   {
   auto app = QBarApplication::instance();
+  QMenu* menu = new QMenu(this);
+  int role = app->currentUserRole();
+  auto table = ui.tableViewGood;
+  QModelIndex index=table->indexAt(pos);
 
   if(app->currentUserRole() > UR_BARTENDER)
     {
-    auto table = ui.tableViewGood;
-    QModelIndex index=table->indexAt(pos);
-    QMenu *menu=new QMenu(this);
     menu->addAction(ui.actionAddGood);
     menu->addAction(ui.actionRemoveGood);
     menu->addAction(ui.actionRemoveGoodCompletly);
+    }
+
+  if(role <= UR_BARTENDER || role > UR_BARTENDER)
+    {
+    menu->addAction(ui.actionFilterGood);
+    menu->addAction(ui.actionResetGoodFilter);
+    }
+
+  if(menu->actions().empty() == false)
+    {
     menu->popup(table->viewport()->mapToGlobal(pos));
     }
   }
@@ -732,6 +743,30 @@ void bar::_OnRemoveGoodCompletely()
         }
       }
     }
+  }
+
+
+//-----------------------------------------------------------------------------------------------------------------------------
+void bar::_OnAddGoodFilter()
+  {
+  auto table = ui.tableViewGood;
+  QModelIndex idx = table->currentIndex();
+  if(idx.isValid())
+    {
+    int good_id = model_goods->record(idx.row()).value("ID").toInt();
+    QString filter = model_transactions_view->filter();
+    if(!filter.isEmpty())
+      filter+=" OR ";
+
+    filter+="GOOD_ID=" + QString::number(good_id);
+    model_transactions_view->setFilter(filter);
+    }
+  }
+
+//-----------------------------------------------------------------------------------------------------------------------------
+void bar::_OnResetGoodFilter()
+  {
+  model_transactions_view->setFilter("");
   }
 
 //-----------------------------------------------------------------------------------------------------------------------------

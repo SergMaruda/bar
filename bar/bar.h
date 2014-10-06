@@ -57,6 +57,8 @@ private Q_SLOTS:
   void _OnAddGood();
   void _OnRemoveGood();
   void _OnRemoveGoodCompletely();
+  void _OnAddGoodFilter();
+  void _OnResetGoodFilter();
   void _OnDebtsByPersons();
   void _OnDebtsByGood();
   void _OnRemoveDebt();

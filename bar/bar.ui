@@ -1483,6 +1483,22 @@ font: 8pt &quot;MS Shell Dlg 2&quot;;</string>
     <string>-</string>
    </property>
   </action>
+  <action name="actionFilterGood">
+   <property name="text">
+    <string>Добавить в фильтр</string>
+   </property>
+   <property name="toolTip">
+    <string>В транзакциях будут показываться товары, добавленные в фильтр</string>
+   </property>
+  </action>
+  <action name="actionResetGoodFilter">
+   <property name="text">
+    <string>Сбросить фильтр</string>
+   </property>
+   <property name="toolTip">
+    <string>Сбросить все фильтры в транзакциях</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -1837,6 +1853,38 @@ font: 8pt &quot;MS Shell Dlg 2&quot;;</string>
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionFilterGood</sender>
+   <signal>triggered()</signal>
+   <receiver>barClass</receiver>
+   <slot>_OnAddGoodFilter()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>331</x>
+     <y>226</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionResetGoodFilter</sender>
+   <signal>triggered()</signal>
+   <receiver>barClass</receiver>
+   <slot>_OnResetGoodFilter()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>331</x>
+     <y>226</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onDblClick()</slot>
@@ -1854,5 +1902,7 @@ font: 8pt &quot;MS Shell Dlg 2&quot;;</string>
   <slot>_IncFont()</slot>
   <slot>_DecFont()</slot>
   <slot>_OnExit()</slot>
+  <slot>_OnAddGoodFilter()</slot>
+  <slot>_OnResetGoodFilter()</slot>
  </slots>
 </ui>
