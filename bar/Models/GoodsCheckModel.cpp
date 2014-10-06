@@ -58,6 +58,7 @@ QVariant GoodsCheckModel::data(const QModelIndex &idx, int role /*=Qt::DisplayRo
   return QSqlTableModel::data(idx, role);
   }
 
+//---------------------------------------------------------------------------------------------------------------------------------------
 void GoodsCheckModel::_dataChanged( const QModelIndex &topLeft, const QModelIndex &bottomRight)
   {
   if(topLeft.isValid() && topLeft == bottomRight)
@@ -70,7 +71,7 @@ void GoodsCheckModel::_dataChanged( const QModelIndex &topLeft, const QModelInde
     setPrimaryKey(idx);
     
     int id =  record(row).value("ID").toInt();
-    QString quary_str(QString("UPDATE GOODS_CHECK SET NUMBER=%1 WHERE GOOD_ID=%2").arg(number).arg(id));
+    QString quary_str(QString("insert or replace into GOODS_CHECK values(%1,%2)").arg(id).arg(number));
     bool res = QSqlQuery().exec(quary_str);
     Q_ASSERT(res);
 

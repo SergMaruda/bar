@@ -130,7 +130,6 @@ bar::bar(QWidget *parent)
   goods_check_view->setTable("GOODS_CHECK_VIEW");
   ui.tableViewGoodsCheck->setModel(goods_check_view);
 
-  _ResetGoodsCheck();
   _ReloadModel(goods_check_view);
 
   _UpdateOrderPrice();
@@ -640,22 +639,6 @@ void bar::_ResetGoodsCheck()
   {
   if(false == _UpdateQuery("DELETE FROM GOODS_CHECK"))
     return;
-
-  QString query_str("INSERT INTO GOODS_CHECK VALUES");
-
-  if(model_goods->rowCount() > 0)
-    {
-    for(int i = 0; i <model_goods->rowCount(); ++i)
-      {
-      auto rec = model_goods->record(i);
-      query_str += QString("(%1, %2),").arg(rec.value(0).toInt()).arg(rec.value(3).toInt());
-      }
-
-    query_str.resize(query_str.size() - 1);
-    
-    if(false == _UpdateQuery(query_str))
-      return;
-    }
 
   _ReloadModel(goods_check_view);
   _UpdateGoodsCheckMode();
