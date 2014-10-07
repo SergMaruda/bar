@@ -6,6 +6,7 @@
 #include <QtSql\qsqlquery.h>
 #include "..\..\Src\qtbase\src\sql\kernel\qsqlfield.h"
 #include "..\..\Src\qtbase\src\sql\kernel\qsqlindex.h"
+#include "QBarApplication.h"
 
 //---------------------------------------------------------------------------------------------------------------------------------------
 GoodsCheckModel::GoodsCheckModel(QObject *parent, QSqlDatabase db):
@@ -36,10 +37,9 @@ QVariant GoodsCheckModel::data(const QModelIndex &idx, int role /*=Qt::DisplayRo
   if (role == Qt::CheckStateRole)
     return QVariant();
 
+  int row = idx.row();
   if (role == Qt::BackgroundRole) 
     {
-    int row = idx.row();
-
     QSqlRecord rec = record(row);
     int number = rec.value(3).toInt();
     if(number < 0)
@@ -52,6 +52,16 @@ QVariant GoodsCheckModel::data(const QModelIndex &idx, int role /*=Qt::DisplayRo
       {
       QColor color(0,255,0, 64);           
       return QBrush(color);
+      }
+    }
+
+  if(idx.isValid() && role ==  Qt::DecorationRole)
+    {
+    int col = idx.column();
+    if(col == 1)
+      {
+      int id =  record(row).value("ID").toInt();
+      return QBarApplication::instance()->goodIcon(id);
       }
     }
 
