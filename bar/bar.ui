@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>788</width>
-    <height>489</height>
+    <width>808</width>
+    <height>545</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -48,7 +48,6 @@ QTableView
 {
 icon-size: 48px 48px;
 }
-
 
 QDialog,
 QTabBar,
@@ -96,6 +95,7 @@ QPlainTextEdit,
 QSpinBox,
 QDoubleSpinBox,
 QComboBox,
+QDateTimeEdit,
 QMenu {
 selection-color: black;
 selection-background-color: rgb(162, 162, 162);
@@ -178,7 +178,7 @@ background-color: rgb(202, 202, 202);
 
 QToolTip {
 background-color: rgb(202, 202, 202);
-opacity: 128; /* with an active composition manager, this should look semi-transparent */
+opacity: 196;  /*with an active composition manager, this should look semi-transparent */
 }
 
 QSplitter::handle:horizontal {
@@ -310,7 +310,7 @@ messagebox-text-interaction-flags: 5 /* text can be selected and copied to clipb
            </size>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>3</number>
           </property>
           <widget class="QWidget" name="tabWidgetPage1_2">
            <attribute name="title">
@@ -387,7 +387,7 @@ messagebox-text-interaction-flags: 5 /* text can be selected and copied to clipb
                 <item row="1" column="1">
                  <widget class="QLineEdit" name="lineEditOrderPrice">
                   <property name="sizePolicy">
-                   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
@@ -408,12 +408,6 @@ messagebox-text-interaction-flags: 5 /* text can be selected and copied to clipb
                 </item>
                 <item row="1" column="0">
                  <widget class="QLabel" name="label_2">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
                   <property name="minimumSize">
                    <size>
                     <width>100</width>
@@ -433,12 +427,6 @@ messagebox-text-interaction-flags: 5 /* text can be selected and copied to clipb
                 </item>
                 <item row="0" column="0">
                  <widget class="QLabel" name="label">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
                   <property name="minimumSize">
                    <size>
                     <width>100</width>
@@ -459,7 +447,7 @@ messagebox-text-interaction-flags: 5 /* text can be selected and copied to clipb
                 <item row="0" column="1">
                  <widget class="QDoubleSpinBox" name="doubleSpinBoxCustomerCash">
                   <property name="sizePolicy">
-                   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
@@ -486,12 +474,6 @@ messagebox-text-interaction-flags: 5 /* text can be selected and copied to clipb
                 </item>
                 <item row="2" column="0">
                  <widget class="QLabel" name="label_3">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
                   <property name="minimumSize">
                    <size>
                     <width>100</width>
@@ -531,7 +513,7 @@ messagebox-text-interaction-flags: 5 /* text can be selected and copied to clipb
                 <item row="2" column="1">
                  <widget class="QLineEdit" name="lineEditChange">
                   <property name="sizePolicy">
-                   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
@@ -1132,6 +1114,9 @@ messagebox-text-interaction-flags: 5 /* text can be selected and copied to clipb
               </item>
               <item>
                <widget class="QDateTimeEdit" name="dateTimeEditStatFrom">
+                <property name="styleSheet">
+                 <string notr="true">background-color: rgb(222, 222, 222);</string>
+                </property>
                 <property name="displayFormat">
                  <string>yyyy-MM-dd H:mm:ss</string>
                 </property>
@@ -1142,6 +1127,9 @@ messagebox-text-interaction-flags: 5 /* text can be selected and copied to clipb
               </item>
               <item>
                <widget class="QDateTimeEdit" name="dateTimeEditStatTo">
+                <property name="styleSheet">
+                 <string notr="true">background-color: rgb(222, 222, 222);</string>
+                </property>
                 <property name="displayFormat">
                  <string>yyyy-MM-dd H:mm:ss</string>
                 </property>
@@ -1206,88 +1194,161 @@ messagebox-text-interaction-flags: 5 /* text can be selected and copied to clipb
            <attribute name="title">
             <string>Склад</string>
            </attribute>
-           <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0">
+           <layout class="QVBoxLayout" name="verticalLayout_7" stretch="0,0">
             <property name="spacing">
              <number>0</number>
             </property>
             <item>
-             <widget class="QTableViewGoodsStore" name="tableViewGood">
-              <property name="minimumSize">
-               <size>
-                <width>20</width>
-                <height>20</height>
-               </size>
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
+              <property name="spacing">
+               <number>0</number>
               </property>
-              <property name="maximumSize">
-               <size>
-                <width>16777215</width>
-                <height>16777215</height>
-               </size>
+              <property name="leftMargin">
+               <number>0</number>
               </property>
-              <property name="mouseTracking">
-               <bool>true</bool>
+              <property name="topMargin">
+               <number>0</number>
               </property>
-              <property name="contextMenuPolicy">
-               <enum>Qt::CustomContextMenu</enum>
+              <property name="rightMargin">
+               <number>0</number>
               </property>
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600;&quot;&gt;Список товаров&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Сделайте двойной щелчек левой кнопкой мышки чтобы добавить товар в транзакцию&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              <property name="bottomMargin">
+               <number>0</number>
               </property>
-              <property name="frameShape">
-               <enum>QFrame::StyledPanel</enum>
-              </property>
-              <property name="sizeAdjustPolicy">
-               <enum>QAbstractScrollArea::AdjustIgnored</enum>
-              </property>
-              <property name="editTriggers">
-               <set>QAbstractItemView::AnyKeyPressed</set>
-              </property>
-              <property name="defaultDropAction">
-               <enum>Qt::CopyAction</enum>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QTabWidget" name="tabWidget_2">
-              <property name="styleSheet">
-               <string notr="true">QTabWidget::pane 
+              <item>
+               <widget class="QTableViewGoodsStore" name="tableViewGood">
+                <property name="minimumSize">
+                 <size>
+                  <width>20</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="mouseTracking">
+                 <bool>true</bool>
+                </property>
+                <property name="contextMenuPolicy">
+                 <enum>Qt::CustomContextMenu</enum>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:600;&quot;&gt;Список товаров&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Сделайте двойной щелчек левой кнопкой мышки чтобы добавить товар в транзакцию&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::StyledPanel</enum>
+                </property>
+                <property name="sizeAdjustPolicy">
+                 <enum>QAbstractScrollArea::AdjustIgnored</enum>
+                </property>
+                <property name="editTriggers">
+                 <set>QAbstractItemView::AnyKeyPressed</set>
+                </property>
+                <property name="defaultDropAction">
+                 <enum>Qt::CopyAction</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QTabWidget" name="tabWidget_2">
+                <property name="styleSheet">
+                 <string notr="true">QTabWidget::pane 
 { 
 border-left: 0px;
 border-right: 0px;
  }</string>
+                </property>
+                <property name="tabPosition">
+                 <enum>QTabWidget::East</enum>
+                </property>
+                <property name="currentIndex">
+                 <number>0</number>
+                </property>
+                <widget class="QWidget" name="tab_7">
+                 <attribute name="title">
+                  <string>Алк. напитки</string>
+                 </attribute>
+                </widget>
+                <widget class="QWidget" name="tab_8">
+                 <attribute name="title">
+                  <string>Б.а. напитки</string>
+                 </attribute>
+                </widget>
+                <widget class="QWidget" name="tab_9">
+                 <attribute name="title">
+                  <string>Снеки</string>
+                 </attribute>
+                </widget>
+                <widget class="QWidget" name="tab_10">
+                 <attribute name="title">
+                  <string>Кухня</string>
+                 </attribute>
+                </widget>
+                <widget class="QWidget" name="tab_11">
+                 <attribute name="title">
+                  <string>Остальное</string>
+                 </attribute>
+                </widget>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <property name="leftMargin">
+               <number>10</number>
               </property>
-              <property name="tabPosition">
-               <enum>QTabWidget::East</enum>
+              <property name="topMargin">
+               <number>10</number>
               </property>
-              <property name="currentIndex">
-               <number>4</number>
+              <property name="rightMargin">
+               <number>10</number>
               </property>
-              <widget class="QWidget" name="tab_7">
-               <attribute name="title">
-                <string>Алк. напитки</string>
-               </attribute>
-              </widget>
-              <widget class="QWidget" name="tab_8">
-               <attribute name="title">
-                <string>Б.а. напитки</string>
-               </attribute>
-              </widget>
-              <widget class="QWidget" name="tab_9">
-               <attribute name="title">
-                <string>Снеки</string>
-               </attribute>
-              </widget>
-              <widget class="QWidget" name="tab_10">
-               <attribute name="title">
-                <string>Кухня</string>
-               </attribute>
-              </widget>
-              <widget class="QWidget" name="tab_11">
-               <attribute name="title">
-                <string>Остальное</string>
-               </attribute>
-              </widget>
-             </widget>
+              <property name="bottomMargin">
+               <number>10</number>
+              </property>
+              <item>
+               <widget class="QWidget" name="widgetFilterIcon" native="true">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>30</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>30</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Фильтр товаров</string>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">QWidget#widgetFilterIcon
+{
+border-image: url(:/bar/Resources/goods_filter.png);
+}</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lineEditGoodsFilter">
+                <property name="clearButtonEnabled">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
            </layout>
           </widget>
@@ -1724,7 +1785,7 @@ border-right: 0px;
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>788</width>
+     <width>808</width>
      <height>21</height>
     </rect>
    </property>
@@ -2218,6 +2279,22 @@ border-right: 0px;
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>lineEditGoodsFilter</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>barClass</receiver>
+   <slot>_GoodsFilterChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>672</x>
+     <y>427</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>403</x>
+     <y>272</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onDblClick()</slot>
@@ -2237,5 +2314,6 @@ border-right: 0px;
   <slot>_OnExit()</slot>
   <slot>_OnAddGoodFilter()</slot>
   <slot>_OnResetGoodFilter()</slot>
+  <slot>_GoodsFilterChanged()</slot>
  </slots>
 </ui>

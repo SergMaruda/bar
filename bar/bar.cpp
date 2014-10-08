@@ -28,6 +28,7 @@
 #include <QtCore\qfileinfo.h>
 #include <QtCore\qregularexpression.h>
 #include <QtCore\qsettings.h>
+#include <QtCore\qsortfilterproxymodel.h>
 
 //----------------------------------------------------
 /*
@@ -1051,4 +1052,29 @@ void bar::_OnExit()
   {
   QBarApplication::instance()->exit(10);
   }
+
+//------------------------------------------------------------
+void bar::_GoodsFilterChanged()
+  {
+  QString f_str = ui.lineEditGoodsFilter->text();
+
+  if(f_str.isEmpty() == false)
+    {
+    QString filt = QString("*") + f_str + QString("*");
+
+    auto proxy_model = new QSortFilterProxyModel();
+    proxy_model->setSourceModel(model_goods);
+    proxy_model->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    proxy_model->setFilterKeyColumn(1);
+    proxy_model->setFilterWildcard(filt);
+
+    ui.tableViewGood->setModel(proxy_model);
+
+    }
+  else
+    {
+    ui.tableViewGood->setModel(model_goods);
+    }
+  }
+
 

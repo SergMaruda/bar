@@ -74,6 +74,7 @@ private Q_SLOTS:
   int _fontSize();
   void _setFont(int);
   void _OnExit();
+  void _GoodsFilterChanged();
   };
 
 #endif // BAR_H

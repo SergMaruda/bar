@@ -16,5 +16,6 @@
         <file>Resources/ok.png</file>
         <file>Resources/up-arrow.png</file>
         <file>Resources/vline.png</file>
+        <file>Resources/goods_filter.png</file>
     </qresource>
 </RCC>
