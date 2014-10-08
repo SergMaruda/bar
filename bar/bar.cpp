@@ -156,6 +156,11 @@ bar::bar(QWidget *parent)
   ui.tableViewGoodsCheck->setSortingEnabled(true);
   _UpdateGoodsCheckMode();
 
+  ui.tableViewGoodsCheck->resizeColumnsToContents();
+    {
+    auto verticalHeader = ui.tableViewGoodsCheck->verticalHeader();
+    verticalHeader->setSectionResizeMode(QHeaderView::ResizeToContents); 
+    }
   auto app = QBarApplication::instance();
   std::wstring str(L"Пользователь: ");
   QString user_str = QString::fromUtf16(str.c_str());
