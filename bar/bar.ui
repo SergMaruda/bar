@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>808</width>
-    <height>545</height>
+    <width>773</width>
+    <height>476</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -310,7 +310,7 @@ messagebox-text-interaction-flags: 5 /* text can be selected and copied to clipb
            </size>
           </property>
           <property name="currentIndex">
-           <number>3</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tabWidgetPage1_2">
            <attribute name="title">
@@ -1199,7 +1199,7 @@ messagebox-text-interaction-flags: 5 /* text can be selected and copied to clipb
              <number>0</number>
             </property>
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,0">
               <property name="spacing">
                <number>0</number>
               </property>
@@ -1785,7 +1785,7 @@ border-image: url(:/bar/Resources/goods_filter.png);
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>808</width>
+     <width>773</width>
      <height>21</height>
     </rect>
    </property>
