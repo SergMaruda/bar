@@ -47,7 +47,7 @@ private Q_SLOTS:
   void _UpdatePurchasePrice();
   void _UpdateCash();
   void _UpdateOrderPrice();
-  QListWidgetItem* _findGoodItem(int good_id);
+  QListWidgetItem* _findGoodItem(QListWidget* ip_list, int good_id);
   void _SyncGoodsIcons(QListWidget* ip_list, TransactionStatus::ETrStatus);
   void _UpdateTakeOffMode();
   void _PerformGoodsCheck();

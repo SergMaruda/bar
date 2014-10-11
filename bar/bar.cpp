@@ -158,6 +158,8 @@ bar::bar(QWidget *parent)
   ui.tableViewTransactions->resizeColumnsToContents();
   
   _SyncGoodsIcons(ui.listWidget, TransactionStatus::WaitingForPayment);
+  _SyncGoodsIcons(ui.listWidgetGoodsToBuy, TransactionStatus::WaitingForPurchasePayment);
+
   ui.tableViewGoodsCheck->setSortingEnabled(true);
   _UpdateGoodsCheckMode();
 
@@ -251,13 +253,13 @@ void bar::OnDoubleClick(QModelIndex idx)
       }
     else
       {
-
       QString query_str = QString("UPDATE Transactions SET Number=Number+1, DATE=\"%2\"  WHERE TR_ID = %1").arg(tr_id).arg(QDateTime::currentDateTime().toString(Qt::ISODate));
       if(false == _UpdateQuery(query_str))
         return;
       }
 
     _UpdateWhenTransactionsChanged();
+    ui.tableViewTransactions->resizeColumnsToContents();
     ui.tableViewTransactions->scrollToBottom();
     }
   }
@@ -363,7 +365,14 @@ void bar::TransactionsDataChanged( const QModelIndex &topLeft, const QModelIndex
     _UpdateOrderPrice();
     _UpdatePurchasePrice();
 
-    _SyncGoodsIcons(ui.listWidget, TransactionStatus::WaitingForPayment);
+    if(status_id == TransactionStatus::WaitingForPayment)
+      {
+      _SyncGoodsIcons(ui.listWidget, TransactionStatus::WaitingForPayment);
+      }
+    if(status_id == TransactionStatus::WaitingForPurchasePayment)
+      {
+      _SyncGoodsIcons(ui.listWidgetGoodsToBuy, TransactionStatus::WaitingForPurchasePayment);
+      }
     }
   }
 
@@ -397,13 +406,14 @@ void bar::OnOnConfirmPurchase()
   _UpdatePurchasePrice();
   _UpdateCash();
   ui.tableViewTransactions->scrollToBottom();
+  ui.listWidgetGoodsToBuy->clear();
   }
 
 //---------------------------------------------------------------------------------------------------
 void bar::_UpdatePurchasePrice()
   {
   model_purchase_price->query().exec();
-  QString str = QString::number(model_purchase_price->record(0).value(0).toDouble(), 'f', 2);
+  QString str = QString::number(model_purchase_price->record(0).value(0).toDouble(), 'f', 2) + QString::fromUtf16(L" грн.");
   ui.lineEditPurchasePrice->setText(str);
   }
 
@@ -521,11 +531,11 @@ double bar::_getNewestPurchasePrice( int id )
   }
 
 //---------------------------------------------------------------------------------------------------
-QListWidgetItem* bar::_findGoodItem( int good_id )
+QListWidgetItem* bar::_findGoodItem(QListWidget* ip_list, int good_id)
   {
-  for(int i(0); i < ui.listWidget->count(); ++i)
+  for(int i(0); i < ip_list->count(); ++i)
     {
-    auto item = ui.listWidget->item(i); 
+    auto item = ip_list->item(i); 
     if(item->data(9999).toInt() == good_id)
       {
       return item;
@@ -546,7 +556,7 @@ void bar::_SyncGoodsIcons(QListWidget* ip_list, TransactionStatus::ETrStatus i_t
     {
     int good_id = sql_qur.value(0).toInt();
     int good_number = sql_qur.value(1).toInt();
-    if(_findGoodItem(good_id) == nullptr)
+    if(_findGoodItem(ip_list, good_id) == nullptr)
       {
       auto p_item(new QListWidgetItem(ip_list));
       QString str;
@@ -560,7 +570,7 @@ void bar::_SyncGoodsIcons(QListWidget* ip_list, TransactionStatus::ETrStatus i_t
       }
     else
       {
-      auto item = _findGoodItem(good_id);
+      auto item = _findGoodItem(ip_list, good_id);
       item->setText(QString::number(good_number));
       }
     }
@@ -598,9 +608,8 @@ void bar::_PerformGoodsCheck()
       float price = model_goods->GoodPrice(good_id);
       if(diff > 0)
         price = -price;
-      query_str += QString::fromUtf16(std::wstring(L"(null, %1, %2, %3, %4, \"инвент\", datetime('now', 'localtime')),").c_str()).arg(good_id).arg(status).arg(std::abs(diff)).arg(price);
+      query_str += QString::fromUtf16(std::wstring(L"(null, %1, %2, %3, %4, \"Инвентаризация\", datetime('now', 'localtime')),").c_str()).arg(good_id).arg(status).arg(std::abs(diff)).arg(price);
       }
-
     }
 
   query_str.resize(query_str.size() - 1);
@@ -988,6 +997,8 @@ void bar::_OnRemoveTransaction()
 void bar::_UpdateWhenTransactionsChanged()
   {
   _SyncGoodsIcons(ui.listWidget, TransactionStatus::WaitingForPayment);
+  _SyncGoodsIcons(ui.listWidgetGoodsToBuy, TransactionStatus::WaitingForPurchasePayment);
+
   _ReloadModel(model_transactions);
   _ReloadModel(model_transactions_view);
   _ReloadModel(model_goods);
