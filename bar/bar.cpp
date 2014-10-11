@@ -1,34 +1,38 @@
 ﻿#include "bar.h"
-#include <QtSql\qsqldatabase.h>
-#include <QtSql\qsqltablemodel.h>
-#include <QtSql\qsqlrecord.h>
-#include <QtSql\qsqlquery.h>
-#include <QtCore\qdatetime.h>
-#include <QtSql\qsqlerror.h>
-#include <QtSql\QSqlRelationalTableModel.h>
-#include <QtWidgets\qscrollbar.h>
-#include <QtWidgets\qtooltip.h>
-#include <QtCore\QTimer>
-#include <QtWidgets\QMessageBox>
-#include <QStyledItemDelegate>
+#include "QLoginDialog.h"
+#include "QBarApplication.h"
 #include "Models\GoodsStoreModel.h"
 #include "TransactionStatus.h"
 #include "Models\TransactionsViewModel.h"
 #include "Models\GoodsCheckModel.h"
-#include <QtSql\qsqlfield.h>
-#include <QtSql\qsqlindex.h>
-#include <QtCore\qthread.h>
-#include "QLoginDialog.h"
-#include "QBarApplication.h"
-#include <QtWidgets\qheaderview.h>
-#include <QtCore\qstandardpaths.h>
 #include "UserRoles.h"
-#include "..\..\Src\qtbase\src\widgets\widgets\qmenu.h"
+
+#include <QtCore\qdatetime.h>
+#include <QtCore\qthread.h>
+#include <QtCore\qstandardpaths.h>
 #include <QtCore\qprocess.h>
 #include <QtCore\qfileinfo.h>
 #include <QtCore\qregularexpression.h>
 #include <QtCore\qsettings.h>
 #include <QtCore\qsortfilterproxymodel.h>
+#include <QtCore\QTimer>
+
+#include <QtSql\qsqldatabase.h>
+#include <QtSql\qsqltablemodel.h>
+#include <QtSql\qsqlrecord.h>
+#include <QtSql\qsqlquery.h>
+#include <QtSql\qsqlfield.h>
+#include <QtSql\qsqlindex.h>
+#include <QtSql\qsqlerror.h>
+#include <QtSql\QSqlRelationalTableModel.h>
+
+#include <QtWidgets\qscrollbar.h>
+#include <QtWidgets\qtooltip.h>
+#include <QtWidgets\QMessageBox>
+#include <QtWidgets\qheaderview.h>
+#include <QtWidgets\QMenu>
+
+#include <QStyledItemDelegate>
 
 //----------------------------------------------------
 /*
@@ -153,7 +157,7 @@ bar::bar(QWidget *parent)
   ui.tableViewTransactions->scrollToBottom();
   ui.tableViewTransactions->resizeColumnsToContents();
   
-  _SyncGoodsIcons();
+  _SyncGoodsIcons(ui.listWidget, TransactionStatus::WaitingForPayment);
   ui.tableViewGoodsCheck->setSortingEnabled(true);
   _UpdateGoodsCheckMode();
 
@@ -359,7 +363,7 @@ void bar::TransactionsDataChanged( const QModelIndex &topLeft, const QModelIndex
     _UpdateOrderPrice();
     _UpdatePurchasePrice();
 
-    _SyncGoodsIcons();
+    _SyncGoodsIcons(ui.listWidget, TransactionStatus::WaitingForPayment);
     }
   }
 
@@ -531,20 +535,20 @@ QListWidgetItem* bar::_findGoodItem( int good_id )
   }
 
 //---------------------------------------------------------------------------------------------------
-void bar::_SyncGoodsIcons()
+void bar::_SyncGoodsIcons(QListWidget* ip_list, TransactionStatus::ETrStatus i_tr_status)
   {
-  QString query_str = QString("SELECT GOOD_ID, Number FROM Transactions WHERE STATUS = %1").arg(TransactionStatus::WaitingForPayment);
+  QString query_str = QString("SELECT GOOD_ID, Number FROM Transactions WHERE STATUS = %1").arg(i_tr_status);
   QSqlQuery sql_qur(query_str);
   sql_qur.exec();
 
-  ui.listWidget->clear();
+  ip_list->clear();
   while(sql_qur.next())
     {
     int good_id = sql_qur.value(0).toInt();
     int good_number = sql_qur.value(1).toInt();
     if(_findGoodItem(good_id) == nullptr)
       {
-      auto p_item(new QListWidgetItem(ui.listWidget));
+      auto p_item(new QListWidgetItem(ip_list));
       QString str;
       str+= model_goods->GoodName(good_id) + "(";
       auto app = QBarApplication::instance();
@@ -983,7 +987,7 @@ void bar::_OnRemoveTransaction()
 //----------------------------------------------------------------------------------------------------------
 void bar::_UpdateWhenTransactionsChanged()
   {
-  _SyncGoodsIcons();
+  _SyncGoodsIcons(ui.listWidget, TransactionStatus::WaitingForPayment);
   _ReloadModel(model_transactions);
   _ReloadModel(model_transactions_view);
   _ReloadModel(model_goods);

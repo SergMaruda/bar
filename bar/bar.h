@@ -1,9 +1,10 @@
 #ifndef BAR_H
 #define BAR_H
 
-#include <QtWidgets/QMainWindow>
 #include "ui_bar.h"
+#include <QtWidgets/QMainWindow>
 #include <QtSql/qsqldatabase.h>
+#include "TransactionStatus.h"
 
 class QSqlTableModel;
 class QSqlDatabase;
@@ -47,7 +48,7 @@ private Q_SLOTS:
   void _UpdateCash();
   void _UpdateOrderPrice();
   QListWidgetItem* _findGoodItem(int good_id);
-  void _SyncGoodsIcons();
+  void _SyncGoodsIcons(QListWidget* ip_list, TransactionStatus::ETrStatus);
   void _UpdateTakeOffMode();
   void _PerformGoodsCheck();
   void _UpdateGoodsCheckMode();
