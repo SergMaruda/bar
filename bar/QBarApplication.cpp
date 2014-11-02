@@ -17,7 +17,7 @@ QBarApplication::QBarApplication(int &argc, char **argv)
   g_inst = this;
 
   QSqlDatabase m_db = QSqlDatabase::addDatabase("QSQLITE");
-  m_db.setDatabaseName("..\\Database\\bar.db");
+  m_db.setDatabaseName(".\bar.db");
   bool ok = m_db.open();
   if(!ok)
     {
@@ -27,15 +27,17 @@ QBarApplication::QBarApplication(int &argc, char **argv)
 
   if(!ok)
     {
-    m_db.setDatabaseName("bar.db");
+    m_db.setDatabaseName("..\\Database\\bar.db");
     ok = m_db.open();
     }
 
   if(!ok)
     QMessageBox::critical(nullptr, "Critial error", "No database file found");
 
-  QSqlQuery query("PRAGMA foreign_keys = ON;");
-
+  if(ok)
+    {
+    QSqlQuery query("PRAGMA foreign_keys = ON;");
+    }
   if(!ok)
     {
     QMessageBox::critical(nullptr,"Ошибка открытия базы данных", "Невозможно открыть файл базы данных. Возможно отсутствует файл либо доступ на чтение");
