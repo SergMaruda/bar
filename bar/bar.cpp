@@ -195,9 +195,8 @@ bar::~bar()
 void bar::OnDoubleClick(QModelIndex idx)
   {
   int row = idx.row();
-  QSqlRecord rec = model_goods->record(row);
-  int good_id = rec.value(0).toInt();
-  int good_quantity = rec.value(3).toFloat();
+  int good_id = idx.sibling(row, 0).data().toInt();
+  int good_quantity = idx.sibling(row, 3).data().toInt();
 
   bool sale = ui.tabWidgetModes->currentIndex() == 0;
   bool purchasing = ui.tabWidgetModes->currentIndex() == 1;
