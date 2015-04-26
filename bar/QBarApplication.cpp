@@ -6,8 +6,15 @@
 #include <QtGui\qicon.h>
 #include <QtCore\qregularexpression.h>
 #include <QtSql\qsqlerror.h>
+#include <QtCore\qfileinfo.h>
 
 static QBarApplication* g_inst = nullptr;
+
+static bool tryOpenExisting(QSqlDatabase& i_db, const QString& str)
+  {
+  i_db.setDatabaseName(str);
+  return QFileInfo::exists(str) && i_db.open();
+  }
 
 //--------------------------------------------------------------------
 QBarApplication::QBarApplication(int &argc, char **argv)
@@ -17,19 +24,12 @@ QBarApplication::QBarApplication(int &argc, char **argv)
   g_inst = this;
 
   QSqlDatabase m_db = QSqlDatabase::addDatabase("QSQLITE");
-  m_db.setDatabaseName(".\bar.db");
-  bool ok = m_db.open();
+  bool ok = tryOpenExisting(m_db, ".\\bar.db");
   if(!ok)
-    {
-    m_db.setDatabaseName("..\\..\\..\\Database\\bar.db");
-    ok = m_db.open();
-    }
+    ok = tryOpenExisting(m_db, "..\\..\\..\\Database\\bar.db");
 
   if(!ok)
-    {
-    m_db.setDatabaseName("..\\Database\\bar.db");
-    ok = m_db.open();
-    }
+    ok = tryOpenExisting(m_db, "..\\Database\\bar.db");
 
   if(!ok)
     QMessageBox::critical(nullptr, "Critial error", "No database file found");

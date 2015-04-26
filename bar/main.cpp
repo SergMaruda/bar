@@ -2,7 +2,11 @@
 #include "QBarApplication.h"
 #include "QLoginDialog.h"
 
-int main(int argc, char *argv[])
+
+extern "C" _declspec(dllexport) int StartPlugin(int argc, char *argv[]);
+
+
+int StartPlugin(int argc, char *argv[])
   {
   QBarApplication* p_app(nullptr);
   int res = 0;
@@ -21,4 +25,6 @@ int main(int argc, char *argv[])
     int res = p_app->exec();
     }
   while(res != 10);
+
+  return 0;
   }
